@@ -11,6 +11,16 @@ int main()
 {
     std::cout << "TD 01" << std::endl;
 
+
+
+    //Valeurs tests à titre indicatif personnel
+    //Changer et remplacer par n'importe quelle fraction/fonction/... voulue
+
+
+
+
+
+
     Fraction f1 {2, 2};
     Fraction f2 {2, 3};
     // Fraction f1 {rand(), rand()};
