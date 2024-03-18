@@ -5,23 +5,6 @@
 
 using namespace std;
 
-std::ostream& operator<<(std::ostream& os, std::vector<int> const& vec) {
-    for (int i = 0; i < vec.size(); i++) {
-        os << vec[i];
-        os << ", ";
-    }
-    return os;
-}
-
-bool is_sorted(std::vector<int> const& vec) { return std::is_sorted(vec.begin(), vec.end()); }
-void cout_is_sorted(std::vector<int> const& vec) {
-    if (is_sorted(vec)) {std::cout << "Le tableau est trié" << std::endl;} 
-    else {
-        std::cout << "Le tableau n'est PAS trié" << std::endl;
-        std::cout << vec << std::endl;
-    }
-}
-
 
 int main()
 {
@@ -33,9 +16,9 @@ int main()
 
     // bubble_sort(array2);
     // selection_sort(array2);
-    quick_sort(array3);
+    quick_sort(array2);
     // merge_sort(array2);
-    cout_is_sorted(array3);
+    cout_is_sorted(array2);
 
 
     return 0;
