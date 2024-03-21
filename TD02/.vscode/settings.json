@@ -57,6 +57,14 @@
         "string": "cpp",
         "vector": "cpp",
         "algorithm": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "chrono": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "xhash": "cpp",
+        "functional": "cpp",
+        "iomanip": "cpp",
+        "sstream": "cpp",
+        "unordered_map": "cpp"
     }
 }
