@@ -16,8 +16,8 @@ int main()
 
     // bubble_sort(array2);
     // selection_sort(array2);
-    quick_sort(array2);
-    // merge_sort(array2);
+    // quick_sort(array2);
+    merge_sort(array2);
     cout_is_sorted(array2);
 
 
