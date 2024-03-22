@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <array>
 #include <string>
 #include <algorithm>
 
@@ -138,4 +139,26 @@ void merge_sort(std::vector<int> & vec, size_t const left, size_t const right) {
 }
 void merge_sort(std::vector<int> & vec) {
     merge_sort(vec, 0, vec.size() - 1);
+}
+
+// -----------------------COUNTING SORT
+
+void counting_sort(std::vector<int> & vec, int const max)  {
+    std::vector<int> occur {};
+
+    occur.resize(max+1,0);
+
+    for(int number : vec) {
+        occur[number]++;
+    }
+    vec.clear();
+
+    for (size_t i = 0; i < occur.size(); i++) {
+        if (occur[i] != 0) {
+            for (size_t j = 0; j < occur[i]; j++) {
+                vec.push_back(i);
+            }
+        }
+    }
+    
 }
