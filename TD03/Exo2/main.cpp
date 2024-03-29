@@ -13,7 +13,7 @@ int main() {
     std::cout << "Entrez un calcul en NPI : ";
     std::getline(std::cin, user_npi);
 
-    std::vector<std::string> tokens {split_string(user_npi)};
+    std::vector<Token> tokens {tokenize(split_string(user_npi))};
     std::cout << "Résultat : " << npi_evaluate(tokens) << std::endl;
 
     return 0;
