@@ -12,3 +12,6 @@ endfunction(add_exercise)
 
 
 add_exercise(Exo1)
+add_exercise(Exo2)
+add_exercise(Exo3)
+add_exercise(Exo4)

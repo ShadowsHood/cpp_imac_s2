@@ -70,6 +70,7 @@
         "stack": "cpp",
         "deque": "cpp",
         "ranges": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "numeric": "cpp"
     }
 }
