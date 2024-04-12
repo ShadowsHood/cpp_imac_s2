@@ -13,6 +13,17 @@
 void console_log_int(int num) {std::cout << num << std::endl;}
 void console_log_str(std::string str) {std::cout << str << std::endl;}
 
+void display_tokens(std::vector<Token> const& tokens) {
+    std::cout << "Tokens : ";
+    for (Token token : tokens) {
+        if (token.is_operand()) {
+            std::cout << token.value << " ";
+        } else {
+            std::cout << token.op_to_char() << ' ';
+        }
+    }
+}
+
 std::vector<std::string> split_string(std::string const& s) {
     std::istringstream in(s); // transforme une chaîne en flux de caractères, cela simule un flux comme l'est std::cin
     // l’itérateur va lire chaque element de "in", comme un flux d'entrée, chaque élément est séparé par un espace
@@ -21,10 +32,7 @@ std::vector<std::string> split_string(std::string const& s) {
 
 bool is_floating(std::string const& s) {
     for (char c : s) {
-        if(std::isdigit(c) || c == '.') {
-            continue;
-        } else {
-            return false;}
+        if(!std::isdigit(c) && c != '.') return false;
     }
     return true;
 }
@@ -51,6 +59,15 @@ Operator make_operator(char elem) {
             break;
         case '/':
             return Operator::DIV;
+            break;
+        case '^':
+            return Operator::POW;
+            break;
+        case '(':
+            return Operator::OPEN_PAREN;
+            break;
+        case ')':
+            return Operator::CLOSE_PAREN;
             break;
         default:
             std::cout << "Invalid operator" << std::endl;
@@ -122,4 +139,54 @@ float npi_evaluate(std::vector<Token> const& tokens) {
     }
 
     return npi_stack.top();
+}
+
+
+size_t operator_precedence(Operator const op) {
+    size_t priority {0};
+    switch (op) {
+        case Operator::ADD:
+        case Operator::SUB:
+            priority = 1;
+            break;
+        case Operator::MUL:
+        case Operator::DIV:
+            priority = 2;
+            break;
+        case Operator::POW:
+            priority = 3;
+            break;
+        default:
+            priority = 0;
+    }
+    return priority;
+}
+
+std::vector<Token> infix_to_npi_tokens(std::string const& expression) {
+    std::vector<Token> tokens {tokenize(split_string(expression))};
+    std::vector<Token> npi_stack {};
+    std::stack<Token> operator_stack {};
+    size_t previous_op_prio {};
+
+    for (Token token : tokens) {
+        if (token.is_operand()) {//POURQUOI IL NE FAUT PAS DE ! (pareil pour le display)
+            npi_stack.push_back(token);
+            std::cout << token.value << std::endl; //DEBUG
+        } else {
+            // std::cout << "Op : " << token.op_to_char() << std::endl;//DEBUG
+            if (token.op != Operator::CLOSE_PAREN) {
+                if (operator_precedence(token.op) < previous_op_prio) npi_stack.push_back(operator_stack.top());
+                operator_stack.push(token);
+            } else {
+                while(operator_stack.top().op != Operator::OPEN_PAREN) {
+                    npi_stack.push_back(operator_stack.top());
+                    operator_stack.pop();
+                }
+                operator_stack.pop();
+            }
+            previous_op_prio = operator_precedence(operator_stack.top().op);
+        }
+    }
+
+    return npi_stack;
 }
