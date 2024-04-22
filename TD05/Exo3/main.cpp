@@ -5,15 +5,6 @@
 #include <iterator>
 #include "cards.hpp"
 
-// namespace std {
-//     template<>
-//     struct hash<Card> {
-//         size_t operator()(Card const& card) const {
-//             return card.hash();
-//         }
-//     };
-// }
-
 int main() {
     std::cout << "TD 05 - Ex 03" << std::endl;
 

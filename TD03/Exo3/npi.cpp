@@ -164,22 +164,22 @@ size_t operator_precedence(Operator const op) {
 
 std::vector<Token> infix_to_npi_tokens(std::string const& expression) {
     std::vector<Token> tokens {tokenize(split_string(expression))};
-    std::vector<Token> npi_stack {};
+    std::vector<Token> npi_vector {};
     std::stack<Token> operator_stack {};
     size_t previous_op_prio {};
 
     for (Token token : tokens) {
         if (token.is_operand()) {//POURQUOI IL NE FAUT PAS DE ! (pareil pour le display) => psk operand = nombre et pas operateur
-            npi_stack.push_back(token);
+            npi_vector.push_back(token);
             std::cout << token.value << std::endl; //DEBUG
         } else {
             // std::cout << "Op : " << token.op_to_char() << std::endl;//DEBUG
             if (token.op != Operator::CLOSE_PAREN) {
-                if (operator_precedence(token.op) < previous_op_prio) npi_stack.push_back(operator_stack.top());
+                if (operator_precedence(token.op) < previous_op_prio) npi_vector.push_back(operator_stack.top());
                 operator_stack.push(token);
             } else {
                 while(operator_stack.top().op != Operator::OPEN_PAREN) {
-                    npi_stack.push_back(operator_stack.top());
+                    npi_vector.push_back(operator_stack.top());
                     operator_stack.pop();
                 }
                 operator_stack.pop();
@@ -188,5 +188,5 @@ std::vector<Token> infix_to_npi_tokens(std::string const& expression) {
         }
     }
 
-    return npi_stack;
+    return npi_vector;
 }

@@ -9,6 +9,10 @@ void console_log_int(int num) {std::cout << num << std::endl;}
 void console_log_str(std::string str) {std::cout << str << std::endl;}
 int random(int const& min, int const& max){return rand() % max + 1 + min;}
 
+bool operator==(Card const& a, Card const& b) {
+    return a.kind == b.kind && a.value == b.value;
+}
+
 std::vector<Card> get_cards(size_t const size) {
     std::vector<Card> cards {};
     cards.reserve(size);
@@ -49,22 +53,37 @@ std::string card_name(Card const& card) {
     return name;
 }
 
-std::unordered_map<std::string, int> number_of_cards(std::vector<Card> const& cardS) {
-    std::unordered_map<std::string, int> cardList {};
+// Bypass en utilisant le nom en string comme key
+
+// std::unordered_map<std::string, int> number_of_cards(std::vector<Card> const& cardS) {
+//     std::unordered_map<std::string, int> cardList {};
+//     for (Card card : cardS) {
+//         auto name {card_name(card)};
+//         auto cardName {cardList.find(name)};
+//         if (cardName != cardList.end()) {
+//             cardName->second++;
+//         } else {
+//             cardList.insert(std::make_pair(name, 1));
+//         }
+//     }
+//     return cardList;
+// }
+
+std::unordered_map<Card, int> number_of_cards(std::vector<Card> const& cardS) {
+    std::unordered_map<Card, int> cardList {};
     for (Card card : cardS) {
-        std::string name {card_name(card)};
-        auto cardName {cardList.find(name)};
+        auto cardName {cardList.find(card)};
         if (cardName != cardList.end()) {
             cardName->second++;
         } else {
-            cardList.insert(std::make_pair(name, 1));
+            cardList.insert(std::make_pair(card, 1));
         }
     }
     return cardList;
 }
 
-void display_card_list(std::unordered_map<std::string, int> const& liste) {
+void display_card_list(std::unordered_map<Card, int> const& liste) {
     for (auto card : liste) {
-        std::cout << card.first <<" : "<< card.second << std::endl;
+        std::cout << card_name(card.first) <<" : "<< card.second << std::endl;
     }
 }
