@@ -17,7 +17,8 @@ struct Token {
     Operator op;
 
     bool is_operand(){
-        return this->type == TokenType::OPERAND ? true : false;
+        // return this->type == TokenType::OPERAND ? true : false;
+        return this->type == TokenType::OPERAND;
     }
 
     char op_to_char() {
