@@ -169,7 +169,7 @@ std::vector<Token> infix_to_npi_tokens(std::string const& expression) {
     size_t previous_op_prio {};
 
     for (Token token : tokens) {
-        if (token.is_operand()) {//POURQUOI IL NE FAUT PAS DE ! (pareil pour le display)
+        if (token.is_operand()) {//POURQUOI IL NE FAUT PAS DE ! (pareil pour le display) => psk operand = nombre et pas operateur
             npi_stack.push_back(token);
             std::cout << token.value << std::endl; //DEBUG
         } else {
