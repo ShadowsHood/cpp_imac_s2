@@ -174,18 +174,28 @@ std::vector<Token> infix_to_npi_tokens(std::string const& expression) {
             std::cout << token.value << std::endl; //DEBUG
         } else {
             // std::cout << "Op : " << token.op_to_char() << std::endl;//DEBUG
-            if (token.op != Operator::CLOSE_PAREN) {
-                if (operator_precedence(token.op) < previous_op_prio) npi_vector.push_back(operator_stack.top());
+            if (token.op == Operator::OPEN_PAREN || operator_stack.empty()) {
                 operator_stack.push(token);
-            } else {
+            } else if (token.op == Operator::CLOSE_PAREN) {   
                 while(operator_stack.top().op != Operator::OPEN_PAREN) {
                     npi_vector.push_back(operator_stack.top());
                     operator_stack.pop();
                 }
                 operator_stack.pop();
             }
-            previous_op_prio = operator_precedence(operator_stack.top().op);
+             else {
+                while (operator_precedence(token.op) < operator_precedence(operator_stack.top().op)) {
+                    npi_vector.push_back(operator_stack.top());
+                    operator_stack.pop();
+                }
+                operator_stack.push(token);
+            }
+            // previous_op_prio = operator_precedence(operator_stack.top().op);
         }
+    }
+    while (!(operator_stack.empty())) {
+        npi_vector.push_back(operator_stack.top());
+        operator_stack.pop();
     }
 
     return npi_vector;
