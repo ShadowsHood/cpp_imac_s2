@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <iterator>
+#include <queue>
 #include "graph.hpp"
 
 void console_log_int(int num) {std::cout << num << std::endl;}
@@ -11,243 +12,148 @@ void console_log_str(std::string str) {std::cout << str << std::endl;}
 int random(int const& min, int const& max){return rand() % max + 1 + min;}
 
 
-Node* create_node(int value) {
-    Node* node { new Node {value, nullptr, nullptr}};
-    return node;
-}
 
-bool Node::is_leaf() const {
-    return (left == nullptr) && (right == nullptr);
-}
-
-void Node::insert(int number) {
-
-    //Problème de référencement à checker dans ce code en commentaire
-    // if (number == this->value) {
-    //     std::cout << "Value already in the tree" << std::endl;
-    //     return;
-    // }
-    // Node** node_to_check = (number < this->value) ? left : right;
-
-    // if (node_to_check != nullptr) {
-    //     node_to_check->insert(number);
-    // } else {
-    //     node_to_check = create_node(number);
-    // }
-
-    if (number < this->value) {
-        (this->left != nullptr) ? this->left->insert(number) : this->left = create_node(number);
-    } else if (number > this->value) {
-        (this->right != nullptr) ? this->right->insert(number) : this->right = create_node(number);
+void Graph::WeightedGraph::add_vertex(int const id) {
+    if (this->adjacency_list.find(id) != this->adjacency_list.end()) {
+        std::cout << "Vertex already in graph" << std::endl;
     } else {
-        std::cout << "Error, value may already exists in the tree" << std::endl;
+        std::vector<Graph::WeightedGraphEdge> list_edges {};
+        this->adjacency_list.insert(std::make_pair(id, list_edges));
     }
 }
 
-int Node::height() const {
-    int height {0};
-    
-    if (!is_leaf()) {
-        int left_height {left ? left->height() : 0};
-        int right_height {right ? right->height() : 0};
-        height = (left_height <= right_height) ? right_height+1 : left_height+1;
-    } else {
-        height = 1;
-    }
-
-    return height;
+void Graph::WeightedGraph::add_directed_edge(int const start, int const dest, float const weight) {
+    this->add_vertex(start);
+    this->add_vertex(dest);
+    auto selected_path { this->adjacency_list.find(start) };
+    selected_path->second.push_back({dest, weight});
 }
 
-void Node::delete_childs() {
-    if (!is_leaf()) {
-        if(left) {
-            left->delete_childs();
-            delete left;
-            left = nullptr;
-        }
-        if(right) {
-            right->delete_childs();
-            delete right;
-            right = nullptr;
-        }
-    }
+void Graph::WeightedGraph::add_undirected_edge(int const start, int const dest, float const weight) {
+    this->add_directed_edge(start,dest,weight);
+    this->add_directed_edge(dest,start,weight);
 }
 
-void Node::display_infixe() const {
-    if (!is_leaf()) {
-        if(left) left->display_infixe();
-        std::cout << value << " ";
-        if(right) right->display_infixe();
-    } else {
-        std::cout << value << " ";
-    }
-}
+void Graph::WeightedGraph::print_DFS(int const start) const{
+    std::stack<int> waiting {};
+    std::vector<int> explored {};
 
-std::vector<Node const*> Node::prefixe() const {
+    waiting.push(start);
+    while (!waiting.empty()) {
+        int curentVertex { waiting.top() };
 
-    std::vector<Node const*> node_list {};
+        std::cout << curentVertex << " ";
+        explored.push_back(curentVertex);
+        waiting.pop();
 
-    node_list.push_back(this);
-    if (!is_leaf()) {
-        if(left) {
-            std::vector<Node const*> left_nodes {left->prefixe()}; 
-            node_list.insert(node_list.end(), left_nodes.begin(), left_nodes.end());
-        }
-        if(right) {
-            std::vector<Node const*> right_nodes {right->prefixe()};
-            node_list.insert(node_list.end(), right_nodes.begin(), right_nodes.end());
-        }
-    }
-
-    return node_list;
-}
-
-
-std::vector<Node const*> Node::postfixe() const {
-    std::vector<Node const*> nodes {};
-    std::stack<Node const*> stack_process {};
-    Node const* previous {nullptr};
-    stack_process.push(this);
-
-    while (!stack_process.empty()) {
-        Node const* current { stack_process.top() };
-
-        // Si on est en train de descendre dans l'arbre
-        if (previous == nullptr || (previous->left == current || previous->right == current)) {
-            if(current->left) {
-                stack_process.push(current->left);
-            }
-            else if(current->right) {
-                stack_process.push(current->right);
-            } else {
-                // on traite le nœud (ajouter au vecteur) et on le retire de la pile
-                nodes.push_back(current);
-                stack_process.pop();
-            }
-
-        // Si l'on remonte dans l'arbre en venant de la gauche
-        }else if (previous == current->left) {
-            if(current->right) {
-                stack_process.push(current->right);
-            } else {
-                nodes.push_back(current);
-                stack_process.pop();
-            }
-
-        // Si l'on remonte dans l'arbre en venant de la droite
-        } else if (previous == current->right) {
-            nodes.push_back(current);
-            stack_process.pop();
-        }
-
-        previous = current;
-
-    }
-    return nodes;
-}
-
-Node*& most_left(Node*& node) {
-    return node->left ? most_left(node->left) : node;
-}
-
-Node*& search_node_value(Node*& node, int number) {
-    if (!node) return node;
-    
-    if (number > node->value) {
-        return node->right ? search_node_value(node->right, number) : node->right;
-    } else if (number < node->value) {
-        return node->left ? search_node_value(node->left, number) : node->left;
-    } else {
-        return node;  // Si le nombre est égal à la valeur du nœud, on retourne le nœud actuel.
-    }
-}
-
-
-void delete_node(Node*& node) {
-    // On supprime le nœud courant
-    delete node;
-    // Comme on a une référence sur le pointeur du nœud courant, on le met à jour avec nullptr
-    // Ainsi le parent du nœud courant aura un pointeur vers nullptr
-    node = nullptr;
-}
-
-bool remove(Node*& node, int number) {
-    if (number == node->value) {
-        // la bonne valeur
-        if (node->is_leaf()) {
-            delete_node(node);
-            // on retourne true car la suppression a été effectuée
-            return true;
-        } else {
-            if (node->right) {
-                // on va chercher le plus petit enfant de droite
-                Node*& lower_right {most_left(node->right)};
-                node->value = lower_right->value;
-                remove(node->right, lower_right->value);
-                return true;
-            } else {
-                // on remplace par son enfant direct
-                Node* node_to_change = node->left;
-                delete_node(node);
-                node = node_to_change;
-                return true;
+        for (Graph::WeightedGraphEdge path : this->adjacency_list.find(curentVertex)->second) {
+            if (find(explored.begin(), explored.end(), path.to) == explored.end()) {
+                waiting.push(path.to);
             }
         }
-    } else {
-        // std::cout << "Unknown case" << std::endl;
-        // return false;
+    }
+}
 
-        // pas la bonne valeur
-        //je go chercher le bon node
-        Node*& new_node {search_node_value(node, number)};
-        if (new_node == nullptr) {
-            std::cout << "Unknown value in tree" << std::endl;
-            return false;
+void Graph::WeightedGraph::print_BFS(int const start) const {
+    std::queue<int> waiting {};
+    std::vector<int> explored {};
+
+    waiting.push(start);
+    while (!waiting.empty()) {
+        int curent_node {waiting.front()};
+
+        std::cout << curent_node << " ";
+        explored.push_back(curent_node);
+        waiting.pop();
+
+        for (Graph::WeightedGraphEdge path : this->adjacency_list.find(curent_node)->second) {
+            if (find(explored.begin(), explored.end(), path.to) == explored.end()) {
+                waiting.push(path.to);
+            }
         }
-        else {
-            return remove(new_node, number);
-        }    
     }
 }
 
-void delete_tree(Node*& node) {
-    node->delete_childs();
-    delete node;
+
+
+
+Graph::WeightedGraph Graph::build_from_adjacency_matrix(std::vector<std::vector<float>> const& adjacency_matrix) {
+    Graph::WeightedGraph graph {};
+    for (int i=0; i<adjacency_matrix.size(); i++) {
+        for (int j=0; j<adjacency_matrix[i].size(); j++) {
+            if (adjacency_matrix[i][j] != 0) {
+                graph.add_directed_edge(i, j, adjacency_matrix[i][j]);
+            }
+        }
+    }  
+    return graph;
 }
 
-int min(Node* node) {
-    return node->left ? min(node->left) : node->value;
-}
 
-int max(Node* node) {
-    return node->right ? max(node->right) : node->value;
-}
+std::unordered_map<int, std::pair<float, int>> dijkstra(Graph::WeightedGraph const& graph, int const& start, int const end) {
+    // On crée un tableau associatif pour stocker les distances les plus courtes connues pour aller du sommet de départ à chaque sommet visité
+    // La clé est l'identifiant du sommet et la valeur est un pair (distance, sommet précédent)
+    std::unordered_map<int, std::pair<float, int>> distances {};
 
-Node* create_tree(std::vector<int> values) {
-    if (values.empty()) return nullptr;
+    // On crée une file de priorité pour stocker les sommets à visiter
+    // la pair contient la distance pour aller jusqu'au sommet et l'identifiant du sommet
 
-    Node* tree { new Node {values[0], nullptr, nullptr}};
-    for (size_t i = 1; i < values.size(); ++i){
-        tree->insert(values[i]);
+    // Ce type compliqué permet d'indiquer que l'on souhaite trier les éléments par ordre croissant (std::greater) et donc les éléments les plus petits seront au début de la file (top) (Min heap)
+    std::priority_queue<std::pair<float, int>, std::vector<std::pair<float, int>>, std::greater<std::pair<float, int>>> to_visit {};
+
+    // 1. On ajoute le sommet de départ à la liste des sommets à visiter avec une distance de 0 (on est déjà sur le sommet de départ)
+    to_visit.push(std::make_pair(0.f, start));
+    distances.insert(std::make_pair(start, std::make_pair(0.f, start)));
+
+    // Tant qu'il reste des sommets à visiter
+    while (!to_visit.empty()) {
+        // 2. On récupère le sommet le plus proche du sommet de départ dans la liste de priorité to_visit
+        int currentVertex { to_visit.top().second };
+        float currentDistance{to_visit.top().first};
+        to_visit.pop();
+        // 3.Si on atteins le point d'arrivé, on s'arrête
+        if (currentVertex == end) {
+            return distances;
+        }
+        // 3. On parcoure la liste des voisins (grâce à la liste d'adjacence) du nœud courant
+        for (auto path : graph.adjacency_list.find(currentVertex)->second) {
+            // 4. on regarde si le nœud existe dans le tableau associatif (si oui il a déjà été visité)
+
+            auto find_node {distances.find(path.to)};
+            bool const visited {find_node == distances.end()?false:true};
+
+             if (!visited) {
+                    // 5. Si le nœud n'a pas été visité, on l'ajoute au tableau associatif en calculant la distance pour aller jusqu'à ce nœud
+                    // la distance actuelle + le point de l'arrête)
+                    distances.insert(std::make_pair(path.to, std::make_pair(
+                        distances.find(currentVertex)->second.first + path.weight, 
+                        currentVertex
+                    )));
+
+                    // 6. On ajout également le nœud de destination à la liste des nœud à visité (avec la distance également pour prioriser les nœuds les plus proches)
+                    to_visit.push(std::make_pair(path.weight, path.to));
+
+                }else {
+                    // 7. Si il a déjà été visité, On test si la distance dans le tableau associatif est plus grande
+                    // Si c'est le cas on à trouvé un plus court chemin, on met à jour le tableau associatif et on ajoute de nouveau le sommet de destination dans la liste à visité
+                    auto& previousPathToCurrent {distances.find(path.to)->second};
+                    float newDistanceToCurrent {distances.find(currentVertex)->second.first + path.weight};
+                    if (previousPathToCurrent.first > newDistanceToCurrent) {
+                        previousPathToCurrent = {newDistanceToCurrent, currentVertex};
+                        to_visit.push(std::make_pair(newDistanceToCurrent, path.to));
+                    }
+                } 
+        }
     }
-    return tree;
+
+    return distances;
 }
 
-
-
-
-
-
-void pretty_print_left_right(Node const& node, std::string const& prefix, bool is_left) {
-    if (node.right) {
-        pretty_print_left_right(*node.right, prefix + (is_left ? "|   " : "    "), false);
+void display_path_form_end(std::unordered_map<int, std::pair<float, int>> const& paths, int const& start, int const end) {
+    int currentPrevious {end};
+    std::cout << currentPrevious << " ";
+    while (currentPrevious != start) {
+        currentPrevious = paths.find(currentPrevious)->second.second;
+        std::cout << currentPrevious << " ";
     }
-    std::cout << prefix << (is_left ? "+-- " : "+-- ") << node.value << std::endl;
-    if (node.left) {
-        pretty_print_left_right(*node.left, prefix + (is_left ? "    " : "|   "), true);
-    }
-}
-
-void pretty_print_left_right(Node const& node) {
-    pretty_print_left_right(node, "", true);
 }

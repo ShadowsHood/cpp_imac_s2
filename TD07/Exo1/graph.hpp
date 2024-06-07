@@ -37,3 +37,11 @@ namespace Graph {
     WeightedGraph build_from_adjacency_matrix(std::vector<std::vector<float>> const& adjacency_matrix);
 
 } // namespace
+
+
+void console_log_int(int num);
+void console_log_str(std::string str);
+int random(int const& min, int const& max);
+
+std::unordered_map<int, std::pair<float, int>> dijkstra(Graph::WeightedGraph const& graph, int const& start, int const end);
+void display_path_form_end(std::unordered_map<int, std::pair<float, int>> const& paths, int const& start, int const end);
