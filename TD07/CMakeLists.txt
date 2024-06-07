@@ -11,4 +11,4 @@ function(add_exercise FOLDER)
 endfunction(add_exercise)
 
 
-add_exercise(Exo1-2)
+add_exercise(Exo1)
