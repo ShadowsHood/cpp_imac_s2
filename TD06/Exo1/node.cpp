@@ -20,9 +20,28 @@ bool Node::is_leaf() const {
     return (left == nullptr) && (right == nullptr);
 }
 
-void Node::insert(int value) {
-    Node* new_node {create_node(value)};
-    (value < this->value) ? left = new_node : right = new_node;
+void Node::insert(int number) {
+
+    //Problème de référencement à checker dans ce code en commentaire
+    // if (number == this->value) {
+    //     std::cout << "Value already in the tree" << std::endl;
+    //     return;
+    // }
+    // Node** node_to_check = (number < this->value) ? left : right;
+
+    // if (node_to_check != nullptr) {
+    //     node_to_check->insert(number);
+    // } else {
+    //     node_to_check = create_node(number);
+    // }
+
+    if (number < this->value) {
+        (this->left != nullptr) ? this->left->insert(number) : this->left = create_node(number);
+    } else if (number > this->value) {
+        (this->right != nullptr) ? this->right->insert(number) : this->right = create_node(number);
+    } else {
+        std::cout << "Error, value may already exists in the tree" << std::endl;
+    }
 }
 
 int Node::height() const {
@@ -31,7 +50,7 @@ int Node::height() const {
     if (!is_leaf()) {
         int left_height {left ? left->height() : 0};
         int right_height {right ? right->height() : 0};
-        height = (left_height <= right_height) ? right_height++ : left_height++;
+        height = (left_height <= right_height) ? right_height+1 : left_height+1;
     } else {
         height = 1;
     }
@@ -41,10 +60,17 @@ int Node::height() const {
 
 void Node::delete_childs() {
     if (!is_leaf()) {
-        if(left) left->delete_childs();
-        if(right) right->delete_childs();
+        if(left) {
+            left->delete_childs();
+            delete left;
+            left = nullptr;
+        }
+        if(right) {
+            right->delete_childs();
+            delete right;
+            right = nullptr;
+        }
     }
-    delete this;
 }
 
 void Node::display_infixe() const {
@@ -124,24 +150,18 @@ Node*& most_left(Node*& node) {
     return node->left ? most_left(node->left) : node;
 }
 
-bool remove(Node*& node, int value) {
-    if (value == node->value && node->is_leaf()) {
-        delete_node(node);
-        // on retourne true car la suppression a été effectuée
-        return true;
-    } else if (value == node->value && !node->is_leaf()) {
-        if (node->left && node->right) {
-
-        } else if (node->left) {
-
-        } else {
-            
-        }
+Node*& search_node_value(Node*& node, int number) {
+    if (!node) return node;
+    
+    if (number > node->value) {
+        return node->right ? search_node_value(node->right, number) : node->right;
+    } else if (number < node->value) {
+        return node->left ? search_node_value(node->left, number) : node->left;
     } else {
-        // pas la bonne value
-        //je go chercher le bon node
+        return node;  // Si le nombre est égal à la valeur du nœud, on retourne le nœud actuel.
     }
 }
+
 
 void delete_node(Node*& node) {
     // On supprime le nœud courant
@@ -151,6 +171,67 @@ void delete_node(Node*& node) {
     node = nullptr;
 }
 
+bool remove(Node*& node, int number) {
+    if (number == node->value) {
+        // la bonne valeur
+        if (node->is_leaf()) {
+            delete_node(node);
+            // on retourne true car la suppression a été effectuée
+            return true;
+        } else {
+            if (node->right) {
+                // on va chercher le plus petit enfant de droite
+                Node*& lower_right {most_left(node->right)};
+                node->value = lower_right->value;
+                remove(node->right, lower_right->value);
+                return true;
+            } else {
+                // on remplace par son enfant direct
+                Node* node_to_change = node->left;
+                delete_node(node);
+                node = node_to_change;
+                return true;
+            }
+        }
+    } else {
+        // std::cout << "Unknown case" << std::endl;
+        // return false;
+
+        // pas la bonne valeur
+        //je go chercher le bon node
+        Node*& new_node {search_node_value(node, number)};
+        if (new_node == nullptr) {
+            std::cout << "Unknown value in tree" << std::endl;
+            return false;
+        }
+        else {
+            return remove(new_node, number);
+        }    
+    }
+}
+
+void delete_tree(Node*& node) {
+    node->delete_childs();
+    delete node;
+}
+
+int min(Node* node) {
+    return node->left ? min(node->left) : node->value;
+}
+
+int max(Node* node) {
+    return node->right ? max(node->right) : node->value;
+}
+
+Node* create_tree(std::vector<int> values) {
+    if (values.empty()) return nullptr;
+
+    Node* tree { new Node {values[0], nullptr, nullptr}};
+    for (size_t i = 1; i < values.size(); ++i){
+        tree->insert(values[i]);
+    }
+    return tree;
+}
 
 
 
