@@ -6,14 +6,14 @@
 #include "node.hpp"
 
 int main() {
-    std::cout << "TD 06 - Ex 01" << std::endl;
+    std::cout << "TD 06 - Ex 01 & 02" << std::endl;
 
     // std::string user_str {};
     // std::cout << "Entrez une phrase à hacher : ";
     // std::getline(std::cin, user_str);
 
-    // std::vector<int> values {5, 3, 7, 2, 4, 6, 8, 1, 9, 0};
-    std::vector<int> values {5, 3, 8, 2, 4, 6, 7, 1, 9, 0};
+    std::vector<int> values {5, 3, 7, 2, 4, 6, 8, 1, 9, 0};
+    // std::vector<int> values {5, 3, 8, 2, 4, 6, 7, 4, 1, 9, 0}; //Better test for all functions (remove, delete, etc.)
     Node* tree { create_tree(values) };
     std::cout << "Ordre infixe : ";
     tree->display_infixe();
